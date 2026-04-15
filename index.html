@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elias & Amara – Wedding Invitation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --silk-cream: #faf9f6;
+            --burnt-brown: #5a4d3a;
+            --champagne: #735c00;
+            --ivory: #ceb594; /* Still needed for Stage 1 matching */
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--silk-cream);
+            margin: 0;
+            overflow-x: hidden;
+            color: var(--burnt-brown);
+        }
+        /* Cinematic Stage Container */
+        #intro-stage {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
+            background: #ceb594;
+        }
+        /* Mobile & PC Container - Immersive High-End Zoom */
+        .video-container {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #ceb594; /* Matching the new Final Moody Hailuo asset */
+        }
+        video {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover !important; /* Force fill edge-to-edge */
+            pointer-events: none; 
+            transform: scale(1.1) !important; /* Zoom in slightly to cut out all frames */
+            filter: brightness(1.02); 
+            transform-origin: center center;
+        }
+        /* PC/Landscape Specific: Show the full video without cropping to width */
+        @media (min-aspect-ratio: 1/1) {
+            video {
+                object-fit: cover !important; /* Switch to cover on PC to allow over-zooming watermarks */
+                width: 110vw !important;
+                height: 110vh !important;
+            }
+        }
+        /* Multi-Section Content (Layer 2) */
+        #main-content {
+            position: relative;
+            background-color: var(--silk-cream);
+            scroll-behavior: smooth;
+        }
+        
+        .glass-card {
+            background: #ffffff !important; /* Solid white */
+            box-shadow: 0 10px 30px rgba(90, 77, 58, 0.05);
+            border: 1px solid rgba(90, 77, 58, 0.1);
+            position: relative;
+            z-index: 20; /* Higher than #timeline-svg */
+        }
+
+        .reveal-card {
+            position: relative;
+            z-index: 20;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Curvy Journey Path */
+        #timeline-svg {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            width: 100px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5; /* Lower than cards to ensure the heart passes behind them */
+        }
+        .path-line {
+            fill: none;
+            stroke: rgba(90, 77, 58, 0.15);
+            stroke-width: 2;
+            stroke-dasharray: 6 6;
+            stroke-linecap: round;
+        }
+        #scrolling-heart {
+            fill: var(--burnt-brown);
+            filter: drop-shadow(0 2px 4px rgba(90, 77, 58, 0.2));
+            transition: transform 0.1s linear;
+        }
+
+        /* Handwritten Reveal (Linear Gradient Mask) */
+        .handwritten-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .handwritten-text {
+            font-family: 'Alex Brush', cursive;
+            font-size: 4rem;
+            line-height: 1.4; /* Added breathing room for cursive loops */
+            color: var(--burnt-brown);
+            padding: 0.5rem 0; /* Ensures descenders aren't clipped */
+            mask-image: linear-gradient(to right, black 0%, black 0%, transparent 0%);
+            mask-size: 200% 100%;
+            mask-repeat: no-repeat;
+            -webkit-mask-image: linear-gradient(to right, black 0%, black 0%, transparent 0%);
+            -webkit-mask-size: 200% 100%;
+            -webkit-mask-repeat: no-repeat;
+            transition: -webkit-mask-image 2s ease-in-out;
+        }
+        .revealed .handwritten-text {
+            -webkit-mask-image: linear-gradient(to right, black 0%, black 100%, black 100%);
+        }
+
+        /* Arches Animation */
+        // --- Heart Animation ---.arch-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 2s ease-out;
+        }
+        .reveal-card.revealed .arch-path {
+            stroke-dashoffset: 0;
+        }
+
+        /* Fairytale Frame Background (Adjusted for new asset) */
+        .timeline-frame-container {
+            position: relative;
+            background-image: url('IMG_5061.PNG');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 100%; /* Spans edge-to-edge on mobile */
+            margin: 0 auto;
+            min-height: 850px;
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+
+        /* Video Hero Backdrop */
+        .hero-video-backdrop {
+            position: relative;
+            height: 85vh; /* Reduced height to allow breathing room */
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--silk-cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Added padding to naturally shrink the 'contain' video */
+        }
+        .hero-video-content {
+            position: relative;
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+            z-index: 0;
+            background-color: var(--silk-cream);
+        }
+        /* Removed lighting and overlay effects as requested */
+
+        .timeline-frame-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--silk-cream);
+            opacity: 0.15;
+            z-index: 1;
+        }
+        .timeline-frame-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Interaction Pulse Overlay */
+        #tap-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 15vh;
+            cursor: pointer;
+            z-index: 1010;
+        }
+        .touch-text {
+            color: #7a6e5a;
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-style: italic;
+            opacity: 0.6;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        /* Love Story Slider Stylings */
+        .love-story-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            padding: 0;
+            background: transparent;
+        }
+        .love-story-slider, .dress-code-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 0;
+            padding: 0;
+        }
+        .love-story-slider::-webkit-scrollbar, .dress-code-slider::-webkit-scrollbar {
+            display: none;
+        }
+        .story-slide, .dress-slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            position: relative;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .story-slide img, .dress-slide img {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            object-fit: contain;
+            display: block;
+        }
+        .dress-label {
+            margin-top: 1rem;
+            color: var(--burnt-brown);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.25rem;
+        }
+        .swipe-hint-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin-top: 0.5rem; /* Lowered the arrow position slightly */
+            color: #d4af37; /* Vibrant Gold */
+        }
+        .pulse-arrow {
+            width: 24px;
+            height: 24px;
+            stroke-width: 3px;
+            animation: arrow-bounce 1.5s infinite;
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.4));
+        }
+        @keyframes arrow-bounce {
+            0%, 100% { transform: translateX(0); opacity: 0.3; }
+            50% { transform: translateX(10px); opacity: 1; }
+        }
+        .pin-bounce {
+            animation: pin-bounce 2s infinite ease-in-out;
+        }
+        @keyframes pin-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        /* RSVP Choice Buttons */
+        .choice-btn {
+            position: relative;
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 10px;
+            font-weight: bold;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 1px solid var(--burnt-brown-10);
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .choice-btn.yes {
+            background: var(--burnt-brown);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(90, 77, 58, 0.2);
+        }
+        .choice-btn.no {
+            background: transparent;
+            color: var(--burnt-brown);
+            opacity: 0.6;
+        }
+        .choice-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(212, 175, 55, 0.2);
+            opacity: 1;
+        }
+        .choice-btn.yes:hover {
+            background: var(--champagne);
+            border-color: var(--champagne);
+        }
+
+        /* Audio Toggle Button */
+        #audio-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(90, 77, 58, 0.15);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            color: #d4af37;
+        }
+        #audio-toggle:hover {
+            transform: scale(1.1) rotate(5deg);
+            background: rgba(255, 255, 255, 0.6);
+            border-color: #d4af37;
+        }
+        #audio-toggle:active {
+            transform: scale(0.95);
+        }
+        #audio-toggle .material-symbols-outlined {
+            font-size: 22px;
+        }
+
+        /* Success Message Hearts */
+        .success-hearts {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+        .success-hearts svg {
+            width: 40px;
+            height: 40px;
+            color: #d4af37;
+            animation: heart-pop 1.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
+        }
+        .success-hearts svg:nth-child(2) { animation-delay: 0.2s; }
+        .success-hearts svg:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes heart-pop {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 10px rgba(212,175,55,0.4)); }
+        }
+
+        /* Celebration Fireworks/Confetti */
+        .confetti-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #d4af37;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            animation: confetti-fall 2s ease-out forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* White Angel Bloom Overlay */
+        #white-angel-bloom {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 40%, rgba(255,255,255,0.95) 70%, rgba(255,255,255,1) 100%);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        /* Layer 2: Main Content Stylings - Centered & Responsive */
+        #main-content {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            transition: opacity 1.5s ease;
+            width: 100%;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+        .invitation-card {
+            background: white;
+            padding: 4rem 2rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(212,175,55,0.2); /* Subtle Gold border */
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .invitation-card.reveal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .floral-header {
+            font-family: 'Alex Brush', cursive;
+            color: var(--gold);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-stage">
+        <div class="video-container" id="video-trigger">
+            <video id="intro-video" muted playsinline preload="auto">
+                <source src="IMG_5076 (1).mp4" type="video/mp4">
+            </video>
+            
+            <div id="tap-overlay">
+                <p class="touch-text">Touch to Open</p>
+                <div class="mt-4 w-12 h-[1px] bg-[#7a6e5a]/30"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="white-angel-bloom"></div>
+
+    <!-- Background Music -->
+    <audio id="bg-music" loop>
+        <source src="Desktop 2026.04.15 - 06.18.51.03.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Audio Controller -->
+    <div id="audio-toggle" onclick="toggleMute()" class="hidden opacity-0">
+        <svg id="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+            <path d="M11 5L6 9H2V15H6L11 19V5Z"></path>
+            <path d="M19.07 4.93C20.94 6.81 22 9.33 22 12C22 14.67 20.94 17.19 19.07 19.07" class="v-on"></path>
+            <path d="M15.54 8.46C16.47 9.4 17 10.63 17 12C17 13.37 16.47 14.6 15.54 15.54" class="v-on"></path>
+        </svg>
+    </div>
+
+    <!-- MAIN CONTENT (Layer 2) -->
+    <div id="main-content" class="hidden opacity-0">
+        <!-- Header removed to allow cinematic video frame to shine -->
+
+        <main class="relative min-h-screen pb-20 w-full">
+            <!-- Pure Video Hero Section (Full Frame) -->
+            <section class="hero-video-backdrop reveal-card" id="hero-reveal">
+                <video id="hero-video-asset" muted playsinline class="hero-video-content">
+                    <source src="IMG_5060.MP4" type="video/mp4">
+                </video>
+                
+                <div class="relative z-20 h-full flex flex-col items-center justify-center text-center">
+                    <div class="mt-10">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Countdown Timer -->
+            <section class="px-6 -mt-32 relative z-30 reveal-card">
+                <div class="glass-card rounded-2xl p-8 text-center shadow-[0_20px_40px_rgba(90,77,58,0.06)]">
+                    <h3 class="text-[var(--burnt-brown)] text-[10px] uppercase tracking-[0.3em] opacity-60 mb-8">Counting down to the magic</h3>
+                    <div class="flex justify-around items-center">
+                        <div>
+                            <span class="text-4xl font-serif text-[var(--champagne)] block">142</span>
+                            <span class="text-[9px] uppercase tracking-widest opacity-50">Days</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-[var(--burnt-brown)]/10"></div>
+                        <div>
+                            <span class="text-4xl font-serif text-[var(--champagne)] block">12</span>
+                            <span class="text-[9px] uppercase tracking-widest opacity-50">Hours</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-[var(--burnt-brown)]/10"></div>
+                        <div>
+                            <span class="text-4xl font-serif text-[var(--champagne)] block">45</span>
+                            <span class="text-[9px] uppercase tracking-widest opacity-50">Mins</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- The Journey (Timeline with Scrolling Heart & Frame) -->
+            <section class="py-24 overflow-visible" id="journey">
+                <h3 class="text-4xl font-serif text-[var(--burnt-brown)] mb-6 text-center italic reveal-card">The Celebration Journey</h3>
+                <div class="w-24 h-[1.5px] bg-[#735c00] mx-auto mb-10 opacity-60" style="display: block !important;"></div>
+                
+                <div class="timeline-frame-container reveal-card">
+                    <div class="relative max-w-2xl mx-auto space-y-12 pb-24" id="timeline-container">
+                        <!-- Animated Curvy Path -->
+                        <svg id="timeline-svg" preserveAspectRatio="none" viewBox="0 0 100 800">
+                            <path class="path-line" d="M50,0 C80,100 20,150 50,250 C80,350 20,450 50,550 C80,650 20,750 50,850" id="journey-path"></path>
+                            <g id="scrolling-heart">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--champagne)"></path>
+                            </g>
+                        </svg>
+
+                        <!-- Event Items (Reduced spacing for fit) -->
+                        <div class="flex flex-col items-center justify-start gap-4 relative w-full reveal-card">
+                            <div class="glass-card rounded-xl p-6 shadow-sm border border-[var(--burnt-brown)]/10 text-center w-64">
+                                <span class="text-[var(--champagne)] font-bold text-[10px] uppercase tracking-widest mb-1 block">4:00 PM</span>
+                                <h4 class="text-[var(--burnt-brown)] font-serif text-lg font-bold">The Ceremony</h4>
+                                <p class="text-[var(--burnt-brown)] text-xs mt-2 italic opacity-70">Exchanging vows under spires.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-start gap-4 relative w-full reveal-card">
+                            <div class="glass-card rounded-xl p-6 shadow-sm border border-[var(--burnt-brown)]/10 text-center w-64">
+                                <span class="text-[var(--champagne)] font-bold text-[10px] uppercase tracking-widest mb-1 block">5:30 PM</span>
+                                <h4 class="text-[var(--burnt-brown)] font-serif text-lg font-bold">Cocktail Hour</h4>
+                                <p class="text-[var(--burnt-brown)] text-xs mt-2 italic opacity-70">Artisanal spirits & melodies.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-start gap-4 relative w-full reveal-card">
+                            <div class="glass-card rounded-xl p-6 shadow-sm border border-[var(--burnt-brown)]/10 text-center w-64">
+                                <span class="text-[var(--champagne)] font-bold text-[10px] uppercase tracking-widest mb-1 block">7:00 PM</span>
+                                <h4 class="text-[var(--burnt-brown)] font-serif text-lg font-bold">Twilight Dinner</h4>
+                                <p class="text-[var(--burnt-brown)] text-xs mt-2 italic opacity-70">A gourmet feast.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-start gap-4 relative w-full reveal-card">
+                            <div class="glass-card rounded-xl p-6 shadow-sm border border-[var(--burnt-brown)]/10 text-center w-64">
+                                <span class="text-[var(--champagne)] font-bold text-[10px] uppercase tracking-widest mb-1 block">9:00 PM</span>
+                                <h4 class="text-[var(--burnt-brown)] font-serif text-lg font-bold">First Dance</h4>
+                                <p class="text-[var(--burnt-brown)] text-xs mt-2 italic opacity-70">Dancing under the moon.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End Frame Container -->
+                <div class="w-24 h-[1.5px] bg-[#735c00] mx-auto mt-20 mb-10 opacity-60" style="display: block !important;"></div>
+            </section>
+
+            <!-- Love Story Gallery (Swipeable) -->
+            <section class="reveal-card">
+                <div class="love-story-container">
+                    <p class="text-center font-serif italic text-2xl text-[var(--burnt-brown)] mb-6">Our Love Story</p>
+                    <div class="love-story-slider">
+                        <!-- Slide 1 -->
+                        <div class="story-slide">
+                            <img src="IMG_5070 (1).PNG" alt="Our Story Part 1">
+                        </div>
+                        <!-- Slide 2 -->
+                        <div class="story-slide">
+                            <img src="IMG_5071 (2).PNG" alt="Our Story Part 2">
+                        </div>
+                    </div>
+                    <div class="swipe-hint-container">
+                        <svg class="pulse-arrow" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dress Code Section -->
+            <section class="w-full px-6 py-24 text-center bg-white/30 backdrop-blur-sm">
+                <div class="max-w-2xl mx-auto reveal-card">
+                    <p class="text-[var(--champagne)] text-[10px] uppercase tracking-[0.4em] mb-4">Attire</p>
+                    <h3 class="text-4xl font-serif text-[var(--burnt-brown)] mb-6 italic">Dress Code</h3>
+                    
+                    <div class="mb-6 max-w-[280px] mx-auto relative">
+                        <div class="dress-code-slider">
+                            <!-- Male Section -->
+                            <div class="dress-slide">
+                                <div class="glass-card p-2 rounded-2xl shadow-lg border border-[var(--burnt-brown)]/10 overflow-hidden">
+                                    <img src="IMG_5082.PNG" alt="Dress Code: Black Suit & Tie" class="w-full h-auto rounded-xl">
+                                </div>
+                                <p class="dress-label">Black Suit & Tie</p>
+                            </div>
+                            <!-- Female Section -->
+                            <div class="dress-slide">
+                                <div class="glass-card p-2 rounded-2xl shadow-lg border border-[var(--burnt-brown)]/10 overflow-hidden">
+                                    <img src="IMG_5086.PNG" alt="Dress Code: Elegant Evening Gown" class="w-full h-auto rounded-xl">
+                                </div>
+                                <p class="dress-label">Elegant Evening Gown</p>
+                            </div>
+                        </div>
+                        <div class="swipe-hint-container">
+                            <svg class="pulse-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <p class="text-[var(--burnt-brown)] italic text-lg max-w-lg mx-auto leading-relaxed mt-10">
+                        Please dress in soft, romantic tones to match our palette.<br>
+                        Let’s paint the evening beautifully together.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Location Section -->
+            <section class="w-full px-6 py-20 bg-[var(--silk-cream)]/50">
+                <div class="max-w-md mx-auto glass-card rounded-3xl overflow-hidden shadow-[0_25px_50px_-12px_rgba(90,77,58,0.1)] reveal-card">
+                    <div class="relative h-64 w-full">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3393.3094406565134!2d35.5861679763!3d31.7153394735!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x15034a1510cbe0ad%3A0x8684d08b3e89547b!2sKempinski%20Hotel%20Ishtar%20Dead%20Sea!5e0!3m2!1sen!2sjo!4v1713148000000!5m2!1sen!2sjo" 
+                            class="w-full h-full border-0" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <div class="absolute inset-0 pointer-events-none border-b border-[var(--burnt-brown)]/10"></div>
+                    </div>
+                    <div class="p-10 text-center">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-[var(--champagne)] pin-bounce" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                        </svg>
+                        <h3 class="text-2xl font-serif text-[var(--burnt-brown)] font-bold mb-2">Kempinski Hotel Ishtar</h3>
+                        <p class="text-[var(--burnt-brown)] text-sm italic mb-8 opacity-70">Dead Sea, Jordan</p>
+                        <a href="https://www.google.com/maps/place/Kempinski+Hotel+Ishtar+Dead+Sea/@31.7153395,35.5887429,17z/data=!4m9!3m8!1s0x15034a1510cbe0ad:0x8684d08b3e89547b!5m2!4m1!1i2!8m2!3d31.7153395!4d35.5887429!16s%2Fg%2F1vh75_q1" target="_blank" class="inline-block px-10 py-3 border border-[var(--burnt-brown)]/20 text-[var(--burnt-brown)] rounded-full text-[10px] uppercase tracking-widest hover:bg-[var(--burnt-brown)] hover:text-white transition-all duration-500">
+                            View Directions
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RSVP Section -->
+            <section class="px-6 mb-20 relative overflow-hidden">
+                <div class="max-w-md mx-auto relative reveal-card">
+                    <!-- Decorative Background Element -->
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-[var(--champagne)]/10 rounded-full blur-3xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-[var(--burnt-brown)]/5 rounded-full blur-3xl"></div>
+                    
+                    <div class="glass-card rounded-[2rem] p-12 shadow-[0_40px_80px_-15px_rgba(90,77,58,0.15)] border border-[var(--champagne)]/20 relative z-10 backdrop-blur-xl transition-all duration-700" id="rsvp-card-inner">
+                        <div id="rsvp-form-content">
+                            <!-- Floral/Romantic Accent -->
+                            <div class="flex justify-center mb-6">
+                                <span class="material-symbols-outlined text-[var(--champagne)] text-4xl animate-pulse">favorite</span>
+                            </div>
+                            
+                            <h3 class="text-3xl font-serif text-[var(--burnt-brown)] mb-4 text-center italic tracking-tight">Will you join us?</h3>
+                            <p class="text-[var(--burnt-brown)] text-[10px] uppercase tracking-[0.5em] text-center mb-12 opacity-50">Reserve your presence</p>
+                            
+                            <div class="space-y-6">
+                                <div class="group relative mb-10">
+                                    <label class="block text-[8px] uppercase tracking-[0.4em] font-bold text-[var(--burnt-brown)]/60 mb-2 transition-all">Guest Name</label>
+                                    <input type="text" id="guest-name-rsvp" placeholder="Your Full Name" class="w-full bg-transparent border-0 border-b border-[var(--burnt-brown)]/15 py-4 text-[var(--burnt-brown)] font-serif text-lg focus:ring-0 focus:border-[var(--champagne)] placeholder:[var(--burnt-brown)]/20 transition-all duration-500">
+                                </div>
+
+                                <div class="flex flex-col gap-4">
+                                    <button onclick="handleRSVP('yes')" class="choice-btn yes">Yes, I will join</button>
+                                    <button onclick="handleRSVP('no')" class="choice-btn no">Sorry, I can't</button>
+                                </div>
+                            </div>
+                            
+                            <p class="mt-12 text-[var(--burnt-brown)] text-[9px] uppercase tracking-[0.3em] text-center opacity-30">Kindly respond by May 15th</p>
+                        </div>
+
+                        <!-- Success Content (Hidden initially) -->
+                        <div id="rsvp-success-content" class="hidden opacity-0 text-center py-6">
+                            <div class="success-hearts">
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            </div>
+                            <h3 class="text-4xl font-serif text-[var(--burnt-brown)] mb-6 italic">We are overjoyed!</h3>
+                            <p class="text-[var(--burnt-brown)] text-[10px] uppercase tracking-[0.5em] opacity-60 leading-relaxed">We can't wait to share our<br>special day with you.</p>
+                        </div>
+
+                        <!-- Regret Content (Hidden initially) -->
+                        <div id="rsvp-no-content" class="hidden opacity-0 text-center py-6">
+                            <div class="text-6xl mb-6 grayscale opacity-80 animate-bounce">😢</div>
+                            <h3 class="text-3xl font-serif text-[var(--burnt-brown)] mb-6 italic">We'll miss you!</h3>
+                            <p class="text-[var(--burnt-brown)] text-[10px] uppercase tracking-[0.5em] opacity-60 leading-relaxed">We wish you could be with us,<br>but you'll be there in our hearts.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="text-center py-20 px-12 opacity-40">
+                <p class="font-serif italic text-2xl text-[var(--champagne)]">Forever Starts Here</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const stage = document.getElementById('intro-stage');
+        const introVideo = document.getElementById('intro-video');
+        const overlay = document.getElementById('tap-overlay');
+        const trigger = document.getElementById('video-trigger');
+
+        let isOpening = false;
+
+        // Definitive Trigger: Listening on window to bypass all stacking issues
+        window.addEventListener('click', (e) => {
+            // Only trigger if we are on the intro stage
+            if (stage.style.display === 'none' || isOpening) return;
+            
+            console.log("Window click captured on Intro Stage");
+            isOpening = true;
+
+            // Start the opening animation
+            introVideo.play().then(() => {
+                console.log("Intro Video Playing Successfully");
+            }).catch(err => {
+                console.error("Intro Video Play Blocked. Proceeding anyway...", err);
+            });
+
+            // Start Audio
+            bgMusic.play().then(() => {
+                console.log("Background Music Playing");
+                // Check for fade out every 500ms
+                const monitorInterval = setInterval(() => {
+                    if (bgMusic.currentTime >= 55) { // Last 5 seconds of the 1-min cap
+                        startFadeOut();
+                        clearInterval(monitorInterval);
+                    }
+                }, 500);
+            }).catch(err => {
+                console.error("Audio playback error:", err);
+            });
+            
+            // Fade out the overlay text immediately
+            overlay.style.transition = 'opacity 0.4s ease';
+            overlay.style.opacity = '0';
+
+            // "White Angel" Transition Logic - High Precision Timers
+            const bloom = document.getElementById('white-angel-bloom');
+            const mainContent = document.getElementById('main-content');
+            const card = document.getElementById('invite-card');
+
+            // Trigger bloom at 3.0s (extending the cinematic intro)
+            setTimeout(() => {
+                if (isOpening) {
+                    bloom.style.opacity = '1';
+                    console.log("White Angel Bloom Triggered");
+                }
+            }, 3000);
+
+                    // Switch layers during complete whiteout at 3.5s
+            setTimeout(() => {
+                if (isOpening) {
+                    console.log("Switching to Layer 2");
+                    introVideo.pause();
+                    stage.style.display = 'none';
+                    mainContent.classList.remove('hidden');
+                    
+                    // Show Mute Button only when main content appears
+                    audioToggle.classList.remove('hidden');
+                    setTimeout(() => audioToggle.classList.add('opacity-100'), 100);
+
+                    // Reveal the sequence after the background has ready
+                    setTimeout(() => {
+                        mainContent.classList.remove('opacity-0');
+                        bloom.style.opacity = '0'; // Fade out the white angel
+                        
+                        // Initial reveal of the hero section
+                        const heroReveal = document.getElementById('hero-reveal');
+                        const heroVideoAsset = document.getElementById('hero-video-asset');
+                        
+                        setTimeout(() => {
+                            heroReveal.classList.add('revealed');
+                            if (heroVideoAsset) {
+                                heroVideoAsset.play(); 
+                            }
+                        }, 500);
+                        
+                        // Path and Heart Initialization
+                        updatePath();
+                        animateHeart();
+                    }, 50);
+                }
+            }, 3500);
+        });
+
+        // --- FAIRYTALE LEGACY LOGIC ---
+        const path = document.getElementById('journey-path');
+        const heart = document.getElementById('scrolling-heart');
+        const container = document.getElementById('timeline-container');
+        const svg = document.getElementById('timeline-svg');
+        const cards = document.querySelectorAll('.reveal-card');
+        const bgMusic = document.getElementById('bg-music');
+        const audioToggle = document.getElementById('audio-toggle');
+        const volumeIcon = document.getElementById('volume-icon');
+
+        let isMuted = false;
+        let fadeStarted = false;
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            bgMusic.muted = isMuted;
+            
+            // Toggle SVG Paths
+            const onPaths = volumeIcon.querySelectorAll('.v-on');
+            if (isMuted) {
+                onPaths.forEach(p => p.style.display = 'none');
+                audioToggle.classList.add('opacity-60');
+            } else {
+                onPaths.forEach(p => p.style.display = 'block');
+                audioToggle.classList.remove('opacity-60');
+            }
+        }
+
+        function startFadeOut() {
+            if (fadeStarted) return;
+            fadeStarted = true;
+            
+            const fadeInterval = 200; // Step every 200ms
+            const fadeDuration = 5000; // 5 seconds total fade
+            const steps = fadeDuration / fadeInterval;
+            const volumeStep = bgMusic.volume / steps;
+            
+            const fadeTimer = setInterval(() => {
+                if (isMuted) {
+                    clearInterval(fadeTimer);
+                    return;
+                }
+                
+                let currentVol = bgMusic.volume;
+                currentVol -= volumeStep;
+                
+                if (currentVol <= 0) {
+                    bgMusic.volume = 0;
+                    bgMusic.pause();
+                    audioToggle.style.opacity = '0';
+                    setTimeout(() => audioToggle.style.display = 'none', 500);
+                    clearInterval(fadeTimer);
+                } else {
+                    bgMusic.volume = currentVol;
+                }
+            }, fadeInterval);
+        }
+
+        function updatePath() {
+            if (!container || !path) return;
+            const containerHeight = container.offsetHeight;
+            svg.setAttribute('viewBox', `0 0 100 ${containerHeight}`);
+            
+            const w = 100;
+            const center = w / 2;
+            const curve = 40; 
+            const steps = 4;
+            const buffer = 150; 
+            let d = `M${center},${buffer - 40} `; // Start exactly where visible at top
+            
+            for(let i=0; i<steps; i++) {
+                const yStart = buffer + (i / steps) * (containerHeight - buffer * 2);
+                const yEnd = buffer + ((i + 1) / steps) * (containerHeight - buffer * 2);
+                const offset = i % 2 === 0 ? curve : -curve;
+                d += `C${center + offset},${yStart + (yEnd-yStart)*0.25} ${center + offset},${yStart + (yEnd-yStart)*0.75} ${center},${yEnd} `;
+            }
+            d += `L${center},${containerHeight - buffer + 40}`; // Clean finish
+            path.setAttribute('d', d);
+        }
+
+        function animateHeart() {
+            if (!container || !path || !heart) return;
+            const rect = container.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            const pathLength = path.getTotalLength();
+            
+            // Adjust progress to start earlier but range 0-1
+            let progress = (windowHeight * 0.5 - rect.top) / rect.height;
+            progress = Math.max(0, Math.min(1, progress));
+
+            try {
+                const point = path.getPointAtLength(progress * pathLength);
+                // Center the heart (heart is roughly 24x24, so offset by -12)
+                heart.setAttribute('transform', `translate(${point.x - 12}, ${point.y - 12})`);
+            } catch (e) {}
+
+            cards.forEach((card) => {
+                const cardRect = card.getBoundingClientRect();
+                if (windowHeight * 0.85 > cardRect.top) {
+                    card.classList.add('revealed');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', animateHeart);
+        window.addEventListener('resize', () => {
+            updatePath();
+            animateHeart();
+        });
+
+        // --- RSVP SUCCESS CELEBRATION ---
+        function handleRSVP(choice) {
+            const form = document.getElementById('rsvp-form-content');
+            const success = document.getElementById('rsvp-success-content');
+            const noContent = document.getElementById('rsvp-no-content');
+            const cardInner = document.getElementById('rsvp-card-inner');
+            const section = cardInner.parentElement;
+
+            // 1. Initial "Press" effect
+            cardInner.style.transform = 'scale(0.98)';
+            cardInner.style.opacity = '0.7';
+
+            if (choice === 'yes') {
+                createCelebration(section);
+                setTimeout(() => {
+                    form.classList.add('hidden');
+                    success.classList.remove('hidden');
+                    setTimeout(() => {
+                        cardInner.style.transform = 'scale(1)';
+                        cardInner.style.opacity = '1';
+                        success.classList.remove('opacity-0');
+                        success.classList.add('opacity-100');
+                    }, 50);
+                }, 400);
+            } else {
+                setTimeout(() => {
+                    form.classList.add('hidden');
+                    noContent.classList.remove('hidden');
+                    setTimeout(() => {
+                        cardInner.style.transform = 'scale(1)';
+                        cardInner.style.opacity = '1';
+                        noContent.classList.remove('opacity-0');
+                        noContent.classList.add('opacity-100');
+                    }, 50);
+                }, 400);
+            }
+        }
+
+        function createCelebration(parent) {
+            const colors = ['#d4af37', '#735c00', '#FFD700', '#FFFFFF'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-particle';
+                
+                // Random position and trajectory
+                const tx = (Math.random() - 0.5) * 400;
+                const ty = (Math.random() - 0.5) * 400 - 100;
+                const size = Math.random() * 8 + 4;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                confetti.style.left = '50%';
+                confetti.style.top = '50%';
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.backgroundColor = color;
+                confetti.style.setProperty('--tx', `${tx}px`);
+                confetti.style.setProperty('--ty', `${ty}px`);
+                
+                parent.appendChild(confetti);
+                
+                // Cleanup
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+    </script>
+</body>
+</html>

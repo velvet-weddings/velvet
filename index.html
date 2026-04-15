@@ -47,16 +47,17 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            background-color: #ceb594; /* Matching the new Final Moody Hailuo asset */
+            background-color: #000000; 
         }
         video {
             width: 100vw !important;
             height: 100vh !important;
-            object-fit: cover !important; /* Force fill edge-to-edge */
+            object-fit: cover !important;
             pointer-events: none; 
-            transform: scale(1.1) !important; /* Zoom in slightly to cut out all frames */
+            transform: scale(1.1) !important;
             filter: brightness(1.02); 
             transform-origin: center center;
+            opacity: 1; /* Reset to visible */
         }
         /* PC/Landscape Specific: Show the full video without cropping to width */
         @media (min-aspect-ratio: 1/1) {
@@ -453,8 +454,8 @@
 
     <div id="intro-stage">
         <div class="video-container" id="video-trigger">
-            <video id="intro-video" muted playsinline preload="auto">
-                <source src="IMG_5076 (1).mp4" type="video/mp4">
+            <video id="intro-video" muted playsinline preload="auto" poster="">
+                <source src="IMG_5060.MP4" type="video/mp4">
             </video>
             
             <div id="tap-overlay">
@@ -728,77 +729,30 @@
         let isOpening = false;
         let fadeStarted = false;
 
-        function safeReveal() {
-            if (isOpening) return;
-            isOpening = true;
-            console.log("Safe Reveal Triggered (Interactive Fallback)");
-            
-            // Start audio immediately (browser usually allows this if triggered by user touch)
-            bgMusic.play().catch(e => console.log("Audio still blocked:", e));
-
-            // Force bloom transition regardless of video state
-            setTimeout(() => {
-                const bloom = document.getElementById('white-angel-bloom');
-                bloom.style.opacity = '1';
-            }, 100);
-
-            // Complete transition to Layer 2
-            setTimeout(() => {
-                stage.style.display = 'none';
-                const mainContent = document.getElementById('main-content');
-                const bloom = document.getElementById('white-angel-bloom');
-                
-                mainContent.classList.remove('hidden');
-                audioToggle.classList.remove('hidden');
-                setTimeout(() => audioToggle.classList.add('opacity-100'), 100);
-
-                setTimeout(() => {
-                    mainContent.classList.remove('opacity-0');
-                    bloom.style.opacity = '0';
-                    updatePath();
-                    animateHeart();
-
-                    // Trigger hero video
-                    const heroVideoAsset = document.getElementById('hero-video-asset');
-                    const heroReveal = document.getElementById('hero-reveal');
-                    if (heroVideoAsset) {
-                        heroReveal.classList.add('revealed');
-                        heroVideoAsset.play();
-                    }
-                }, 500);
-            }, 500);
-        }
-
         function handleIntroClick(e) {
             if (stage.style.display === 'none' || isOpening) return;
             isOpening = true;
             
-            console.log("Intro Interaction Captured:", e.type);
+            console.log("Intro Interaction Captured:", e ? e.type : "manual");
             
-            // 1. Play Video
-            introVideo.play().catch(err => {
-                console.error("Intro Video Blocked:", err);
-                // If video fails, trigger the bloom immediately
-                safeReveal();
-            });
+            // 1. Play Video (IMG_5060.MP4)
+            introVideo.play().catch(err => console.error("Intro Video Play Blocked:", err));
 
             // 2. Play Audio
             bgMusic.play().then(() => {
-                console.log("Background Music Playing");
                 const monitorInterval = setInterval(() => {
                     if (bgMusic.currentTime >= 55) {
                         startFadeOut();
                         clearInterval(monitorInterval);
                     }
                 }, 500);
-            }).catch(err => {
-                console.error("Audio playback error:", err);
-            });
+            }).catch(err => console.error("Audio playback error:", err));
 
-            // 3. Visual Transition Logic
+            // 3. UI Transition
             overlay.style.transition = 'opacity 0.4s ease';
             overlay.style.opacity = '0';
             
+            // Transition to main content after video finishes (approx 3.5s)
             const bloom = document.getElementById('white-angel-bloom');
             const mainContent = document.getElementById('main-content');
 
@@ -822,7 +776,9 @@
                     const heroVideoAsset = document.getElementById('hero-video-asset');
                     setTimeout(() => {
                         heroReveal.classList.add('revealed');
-                        if (heroVideoAsset) heroVideoAsset.play();
+                        if (heroVideoAsset) {
+                            heroVideoAsset.play().catch(e => console.log("Hero video blocked", e));
+                        }
                     }, 500);
                     
                     updatePath();
@@ -831,9 +787,8 @@
             }, 3500);
         }
 
-        // Broad Listeners for multi-device support
+        // Broad Listeners to catch the first tap
         window.addEventListener('touchstart', handleIntroClick, { passive: false });
-        window.addEventListener('mousedown', handleIntroClick);
         window.addEventListener('click', handleIntroClick);
 
         // --- FAIRYTALE LEGACY LOGIC ---
@@ -842,12 +797,8 @@
         const container = document.getElementById('timeline-container');
         const svg = document.getElementById('timeline-svg');
         const cards = document.querySelectorAll('.reveal-card');
-        const bgMusic = document.getElementById('bg-music');
-        const audioToggle = document.getElementById('audio-toggle');
-        const volumeIcon = document.getElementById('volume-icon');
 
         let isMuted = false;
-        let fadeStarted = false;
 
         function toggleMute() {
             isMuted = !isMuted;

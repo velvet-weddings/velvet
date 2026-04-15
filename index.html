@@ -454,7 +454,7 @@
 
     <div id="intro-stage">
         <div class="video-container" id="video-trigger">
-            <video id="intro-video" muted playsinline preload="none" poster="IMG_5076 (1).mp4#t=0.001">
+            <video id="intro-video" muted playsinline>
                 <source src="IMG_5076 (1).mp4" type="video/mp4">
             </video>
             
@@ -725,10 +725,6 @@
         const bgMusic = document.getElementById('bg-music');
         const audioToggle = document.getElementById('audio-toggle');
         const volumeIcon = document.getElementById('volume-icon');
-
-        // Hard lock for mobile: Ensure video is dead still on load
-        introVideo.pause();
-        introVideo.currentTime = 0;
 
         let isOpening = false;
         let fadeStarted = false;

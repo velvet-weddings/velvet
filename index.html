@@ -454,7 +454,7 @@
 
     <div id="intro-stage">
         <div class="video-container" id="video-trigger">
-            <video id="intro-video" muted playsinline preload="auto" poster="">
+            <video id="intro-video" muted playsinline preload="auto" poster="IMG_5076 (1).mp4">
                 <source src="IMG_5076 (1).mp4" type="video/mp4">
             </video>
             
@@ -731,12 +731,17 @@
 
         function handleIntroClick(e) {
             if (stage.style.display === 'none' || isOpening) return;
-            isOpening = true;
             
+            // Critical: Attempt to play immediately on touch
+            isOpening = true;
             console.log("Intro Interaction Captured:", e ? e.type : "manual");
             
-            // 1. Play Video (IMG_5060.MP4)
-            introVideo.play().catch(err => console.error("Intro Video Play Blocked:", err));
+            // 1. Play Video (IMG_5076 (1).mp4)
+            introVideo.play().then(() => {
+                introVideo.style.opacity = '1';
+            }).catch(err => {
+                console.error("Intro Video Play Blocked:", err);
+            });
 
             // 2. Play Audio
             bgMusic.play().then(() => {
@@ -752,7 +757,6 @@
             overlay.style.transition = 'opacity 0.4s ease';
             overlay.style.opacity = '0';
             
-            // Transition to main content after video finishes (approx 3.5s)
             const bloom = document.getElementById('white-angel-bloom');
             const mainContent = document.getElementById('main-content');
 
@@ -787,8 +791,9 @@
             }, 3500);
         }
 
-        // Broad Listeners to catch the first tap
+        // Broad Listeners for first tap
         window.addEventListener('touchstart', handleIntroClick, { passive: false });
+        window.addEventListener('mousedown', handleIntroClick);
         window.addEventListener('click', handleIntroClick);
 
         // --- FAIRYTALE LEGACY LOGIC ---

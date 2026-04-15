@@ -207,9 +207,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-end;
-            padding-bottom: 15vh;
+            padding-bottom: 20vh;
             cursor: pointer;
-            z-index: 1010;
+            z-index: 2000; /* Extremely high to ensure touch capture */
+            background: transparent;
         }
         .touch-text {
             color: #7a6e5a;
@@ -720,30 +721,72 @@
         const introVideo = document.getElementById('intro-video');
         const overlay = document.getElementById('tap-overlay');
         const trigger = document.getElementById('video-trigger');
+        const bgMusic = document.getElementById('bg-music');
+        const audioToggle = document.getElementById('audio-toggle');
+        const volumeIcon = document.getElementById('volume-icon');
 
         let isOpening = false;
+        let fadeStarted = false;
 
-        // Definitive Trigger: Listening on window to bypass all stacking issues
-        window.addEventListener('click', (e) => {
-            // Only trigger if we are on the intro stage
-            if (stage.style.display === 'none' || isOpening) return;
-            
-            console.log("Window click captured on Intro Stage");
+        function safeReveal() {
+            if (isOpening) return;
             isOpening = true;
+            console.log("Safe Reveal Triggered (Interactive Fallback)");
+            
+            // Start audio immediately (browser usually allows this if triggered by user touch)
+            bgMusic.play().catch(e => console.log("Audio still blocked:", e));
 
-            // Start the opening animation
-            introVideo.play().then(() => {
-                console.log("Intro Video Playing Successfully");
-            }).catch(err => {
-                console.error("Intro Video Play Blocked. Proceeding anyway...", err);
+            // Force bloom transition regardless of video state
+            setTimeout(() => {
+                const bloom = document.getElementById('white-angel-bloom');
+                bloom.style.opacity = '1';
+            }, 100);
+
+            // Complete transition to Layer 2
+            setTimeout(() => {
+                stage.style.display = 'none';
+                const mainContent = document.getElementById('main-content');
+                const bloom = document.getElementById('white-angel-bloom');
+                
+                mainContent.classList.remove('hidden');
+                audioToggle.classList.remove('hidden');
+                setTimeout(() => audioToggle.classList.add('opacity-100'), 100);
+
+                setTimeout(() => {
+                    mainContent.classList.remove('opacity-0');
+                    bloom.style.opacity = '0';
+                    updatePath();
+                    animateHeart();
+
+                    // Trigger hero video
+                    const heroVideoAsset = document.getElementById('hero-video-asset');
+                    const heroReveal = document.getElementById('hero-reveal');
+                    if (heroVideoAsset) {
+                        heroReveal.classList.add('revealed');
+                        heroVideoAsset.play();
+                    }
+                }, 500);
+            }, 500);
+        }
+
+        function handleIntroClick(e) {
+            if (stage.style.display === 'none' || isOpening) return;
+            isOpening = true;
+            
+            console.log("Intro Interaction Captured:", e.type);
+            
+            // 1. Play Video
+            introVideo.play().catch(err => {
+                console.error("Intro Video Blocked:", err);
+                // If video fails, trigger the bloom immediately
+                safeReveal();
             });
 
-            // Start Audio
+            // 2. Play Audio
             bgMusic.play().then(() => {
                 console.log("Background Music Playing");
-                // Check for fade out every 500ms
                 const monitorInterval = setInterval(() => {
-                    if (bgMusic.currentTime >= 55) { // Last 5 seconds of the 1-min cap
+                    if (bgMusic.currentTime >= 55) {
                         startFadeOut();
                         clearInterval(monitorInterval);
                     }
@@ -751,59 +794,47 @@
             }).catch(err => {
                 console.error("Audio playback error:", err);
             });
-            
-            // Fade out the overlay text immediately
+
+            // 3. Visual Transition Logic
             overlay.style.transition = 'opacity 0.4s ease';
             overlay.style.opacity = '0';
-
-            // "White Angel" Transition Logic - High Precision Timers
+            
             const bloom = document.getElementById('white-angel-bloom');
             const mainContent = document.getElementById('main-content');
-            const card = document.getElementById('invite-card');
 
-            // Trigger bloom at 3.0s (extending the cinematic intro)
             setTimeout(() => {
-                if (isOpening) {
-                    bloom.style.opacity = '1';
-                    console.log("White Angel Bloom Triggered");
-                }
+                bloom.style.opacity = '1';
             }, 3000);
 
-                    // Switch layers during complete whiteout at 3.5s
             setTimeout(() => {
-                if (isOpening) {
-                    console.log("Switching to Layer 2");
-                    introVideo.pause();
-                    stage.style.display = 'none';
-                    mainContent.classList.remove('hidden');
-                    
-                    // Show Mute Button only when main content appears
-                    audioToggle.classList.remove('hidden');
-                    setTimeout(() => audioToggle.classList.add('opacity-100'), 100);
+                introVideo.pause();
+                stage.style.display = 'none';
+                mainContent.classList.remove('hidden');
+                
+                audioToggle.classList.remove('hidden');
+                setTimeout(() => audioToggle.classList.add('opacity-100'), 100);
 
-                    // Reveal the sequence after the background has ready
+                setTimeout(() => {
+                    mainContent.classList.remove('opacity-0');
+                    bloom.style.opacity = '0';
+                    
+                    const heroReveal = document.getElementById('hero-reveal');
+                    const heroVideoAsset = document.getElementById('hero-video-asset');
                     setTimeout(() => {
-                        mainContent.classList.remove('opacity-0');
-                        bloom.style.opacity = '0'; // Fade out the white angel
-                        
-                        // Initial reveal of the hero section
-                        const heroReveal = document.getElementById('hero-reveal');
-                        const heroVideoAsset = document.getElementById('hero-video-asset');
-                        
-                        setTimeout(() => {
-                            heroReveal.classList.add('revealed');
-                            if (heroVideoAsset) {
-                                heroVideoAsset.play(); 
-                            }
-                        }, 500);
-                        
-                        // Path and Heart Initialization
-                        updatePath();
-                        animateHeart();
-                    }, 50);
-                }
+                        heroReveal.classList.add('revealed');
+                        if (heroVideoAsset) heroVideoAsset.play();
+                    }, 500);
+                    
+                    updatePath();
+                    animateHeart();
+                }, 50);
             }, 3500);
-        });
+        }
+
+        // Broad Listeners for multi-device support
+        window.addEventListener('touchstart', handleIntroClick, { passive: false });
+        window.addEventListener('mousedown', handleIntroClick);
+        window.addEventListener('click', handleIntroClick);
 
         // --- FAIRYTALE LEGACY LOGIC ---
         const path = document.getElementById('journey-path');

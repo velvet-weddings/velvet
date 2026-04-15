@@ -47,7 +47,10 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            background-color: #000000; 
+            background-color: #ceb594;
+            background-image: url('IMG_5076 (1).mp4#t=0.001'); /* Shows envelope instantly */
+            background-size: cover;
+            background-position: center;
         }
         video {
             width: 100vw !important;
@@ -454,7 +457,7 @@
 
     <div id="intro-stage">
         <div class="video-container" id="video-trigger">
-            <video id="intro-video" muted playsinline>
+            <video id="intro-video" muted playsinline style="opacity: 0; transition: opacity 0.3s ease;">
                 <source src="IMG_5076 (1).mp4" type="video/mp4">
             </video>
             
@@ -731,15 +734,13 @@
 
         function handleIntroClick(e) {
             if (stage.style.display === 'none' || isOpening) return;
-            
-            // Critical: Attempt to play immediately on touch
             isOpening = true;
+            
             console.log("Intro Interaction Captured:", e ? e.type : "manual");
             
-            // 1. Play Video (IMG_5076 (1).mp4)
-            introVideo.play().then(() => {
-                introVideo.style.opacity = '1';
-            }).catch(err => {
+            // 1. Reveal video and Play immediately
+            introVideo.style.opacity = '1';
+            introVideo.play().catch(err => {
                 console.error("Intro Video Play Blocked:", err);
             });
 
